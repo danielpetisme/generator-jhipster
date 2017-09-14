@@ -105,7 +105,7 @@ public class MailService {
         sendEmail(user.getEmail(), subject, content, false, true);
 
     }
-
+<%_ if (authenticationType !== 'oauth2') { _%>
     @Async
     public void sendActivationEmail(User user) {
         log.debug("Sending activation email to '{}'", user.getEmail());
@@ -123,6 +123,7 @@ public class MailService {
         log.debug("Sending password reset email to '{}'", user.getEmail());
         sendEmailFromTemplate(user, "passwordResetEmail", "email.reset.title");
     }
+<%_ } _%>
     <%_ if (enableSocialSignIn) { _%>
 
     @Async

@@ -29,11 +29,13 @@ import <%=packageName%>.repository.PersistentTokenRepository;
 <%_ } _%>
 import <%=packageName%>.repository.UserRepository;
 import <%=packageName%>.security.AuthoritiesConstants;
+<%_ if (authenticationType !== 'oauth2') { _%>
 import <%=packageName%>.service.MailService;
-import <%=packageName%>.service.UserService;
 import <%=packageName%>.service.dto.UserDTO;
 import <%=packageName%>.web.rest.vm.KeyAndPasswordVM;
 import <%=packageName%>.web.rest.vm.ManagedUserVM;
+import <%=packageName%>.service.UserService;
+<%_ } _%>
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,15 +44,20 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;<% if (databaseType === 'sql') { %>
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;<% if (databaseType === 'sql' && authenticationType !== 'oauth2') { %>
 import org.springframework.transaction.annotation.Transactional;<% } %>
-
+<%_ if (authenticationType !== 'oauth2') { _%>
+import org.springframework.web.context.WebApplicationContext;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+<% } %>
 import java.time.Instant;<% if (databaseType === 'sql' || databaseType === 'mongodb') { %>
 import java.time.LocalDate;<% } %>
 import java.util.*;
@@ -76,50 +83,57 @@ public class AccountResourceIntTest <% if (databaseType === 'cassandra') { %>ext
 
     @Autowired
     private UserRepository userRepository;
-<%_ if (databaseType === 'sql' || databaseType === 'mongodb') { _%>
+<%_ if (authenticationType !== 'oauth2' && (databaseType === 'sql' || databaseType === 'mongodb')) { _%>
 
     @Autowired
     private AuthorityRepository authorityRepository;
 <%_ } _%>
-
+<%_ if (authenticationType !== 'oauth2') { _%>
     @Autowired
     private UserService userService;
+<%_ } _%>
 <%_ if (authenticationType === 'session') { _%>
 
     @Autowired
     private PersistentTokenRepository persistentTokenRepository;
 <%_ } _%>
-
+<% if (authenticationType !== 'oauth2') { %>
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
     private HttpMessageConverter[] httpMessageConverters;
-
-    @Mock
+<%_ } _%>
+    @MockBean
     private UserService mockUserService;
-
+<% if (authenticationType !== 'oauth2') { %>
     @Mock
     private MailService mockMailService;
 
-    private MockMvc restUserMockMvc;
-
     private MockMvc restMvc;
+<%_ } _%>
+    private MockMvc restUserMockMvc;
+<%_ if (authenticationType === 'oauth2') { _%>
+    @Autowired
+    private WebApplicationContext context;
+<%_ } _%>
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         doNothing().when(mockMailService).sendActivationEmail(anyObject());
 
+        <%_ if (authenticationType ==! 'oauth2') { _%>
         AccountResource accountResource =
             new AccountResource(userRepository, userService, mockMailService<% if (authenticationType === 'session') { %>, persistentTokenRepository<% } %>);
-
+        <%_ } _%>
         AccountResource accountUserMockResource =
             new AccountResource(userRepository, mockUserService, mockMailService<% if (authenticationType === 'session') { %>, persistentTokenRepository<% } %>);
-
+        <%_ if (authenticationType ==! 'oauth2') { _%>
         this.restMvc = MockMvcBuilders.standaloneSetup(accountResource)
             .setMessageConverters(httpMessageConverters)
             .build();
+        <%_ } _%>
         this.restUserMockMvc = MockMvcBuilders.standaloneSetup(accountUserMockResource).build();
     }
 
@@ -164,7 +178,16 @@ public class AccountResourceIntTest <% if (databaseType === 'cassandra') { %>ext
         user.setAuthorities(authorities);
         when(mockUserService.getUserWithAuthorities()).thenReturn(user);
 
+        <%_ if (authenticationType === 'oauth2') { _%>
+        // create security-aware mockMvc
+        restUserMockMvc = MockMvcBuilders
+            .webAppContextSetup(context)
+            .apply(springSecurity())
+            .build();
+        <%_ } _%>
+
         restUserMockMvc.perform(get("/api/account")
+            <%_ if (authenticationType === 'oauth2') { _%>.with(user(user.getLogin()).roles("ADMIN"))<%_ } _%>
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -187,7 +210,7 @@ public class AccountResourceIntTest <% if (databaseType === 'cassandra') { %>ext
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isInternalServerError());
     }
-
+<% if (authenticationType !== 'oauth2') { %>
     @Test<% if (databaseType === 'sql') { %>
     @Transactional<% } %>
     public void testRegisterValid() throws Exception {
@@ -951,4 +974,5 @@ public class AccountResourceIntTest <% if (databaseType === 'cassandra') { %>ext
                 .content(TestUtil.convertObjectToJsonBytes(keyAndPassword)))
             .andExpect(status().isInternalServerError());
     }
+<% } %>
 }

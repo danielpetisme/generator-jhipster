@@ -32,17 +32,19 @@ import {
     <%_ } _%>
     StateStorageService,
     LoginService,
+    <%_ if (authenticationType !== 'oauth2') { _%>
     LoginModalService,
+    <%=jhiPrefixCapitalized%>LoginModalComponent
+    <%_ } _%>
     Principal,
     <%_ if (websocket === 'spring-websocket') { _%>
     <%=jhiPrefixCapitalized%>TrackerService,
     <%_ } _%>
     HasAnyAuthorityDirective,
-<%_ if (enableSocialSignIn) { _%>
+    <%_ if (enableSocialSignIn) { _%>
     <%=jhiPrefixCapitalized%>SocialComponent,
     SocialService,
-<%_ } _%>
-    <%=jhiPrefixCapitalized%>LoginModalComponent
+    <%_ } _%>
 } from './';
 
 @NgModule({
@@ -54,12 +56,16 @@ import {
         <%_ if (enableSocialSignIn) { _%>
         <%=jhiPrefixCapitalized%>SocialComponent,
         <%_ } _%>
+        <%_ if (authenticationType !== 'oauth2') { _%>
         <%=jhiPrefixCapitalized%>LoginModalComponent,
+        <%_ } _%>
         HasAnyAuthorityDirective
     ],
     providers: [
         LoginService,
+        <%_ if (authenticationType !== 'oauth2') { _%>
         LoginModalService,
+        <%_ } _%>
         AccountService,
         StateStorageService,
         Principal,
@@ -78,13 +84,17 @@ import {
         <%_ } _%>
         DatePipe
     ],
+    <%_ if (authenticationType !== 'oauth2') { _%>
     entryComponents: [<%=jhiPrefixCapitalized%>LoginModalComponent],
+    <%_ } _%>
     exports: [
         <%=angularXAppName%>SharedCommonModule,
         <%_ if (enableSocialSignIn) { _%>
         <%=jhiPrefixCapitalized%>SocialComponent,
         <%_ } _%>
+        <%_ if (authenticationType !== 'oauth2') { _%>
         <%=jhiPrefixCapitalized%>LoginModalComponent,
+        <%_ } _%>
         HasAnyAuthorityDirective,
         DatePipe
     ],

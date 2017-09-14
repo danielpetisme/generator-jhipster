@@ -23,12 +23,16 @@ import { RequestOptionsArgs, Response } from '@angular/http';
 import { Router } from '@angular/router/router';
 <%_ } _%>
 import { Observable } from 'rxjs/Observable';
-<%_ if (authenticationType === 'oauth2' || authenticationType === 'jwt' || authenticationType === 'uaa') { _%>
+<%_ if (authenticationType === 'jwt' || authenticationType === 'uaa') { _%>
 import { LoginService } from '../../shared/login/login.service';
-<%_ } if (authenticationType === 'session') { _%>
+<%_ } else if (authenticationType === 'session') { _%>
 import { AuthServerProvider } from '../../shared/auth/auth-session.service';
 import { StateStorageService } from '../../shared/auth/state-storage.service';
 import { LoginModalService } from '../../shared/login/login-modal.service';
+<%_ } else if (authenticationType === 'oauth2') { _%>
+import { AuthServerProvider } from '../../shared/auth/auth-session.service';
+import { StateStorageService } from '../../shared/auth/state-storage.service';
+import { LoginService } from '../../shared/login/login.service';
 <%_ } _%>
 
 export class AuthExpiredInterceptor extends JhiHttpInterceptor {
@@ -48,7 +52,7 @@ export class AuthExpiredInterceptor extends JhiHttpInterceptor {
     requestIntercept(options?: RequestOptionsArgs): RequestOptionsArgs {
         return options;
     }
-<%_ if (authenticationType === 'oauth2' || authenticationType === 'jwt' || authenticationType === 'uaa') { _%>
+<%_ if (authenticationType === 'jwt' || authenticationType === 'uaa') { _%>
 
     responseIntercept(observable: Observable<Response>): Observable<Response> {
         return <Observable<Response>> observable.catch((error, source) => {
@@ -59,7 +63,7 @@ export class AuthExpiredInterceptor extends JhiHttpInterceptor {
             return Observable.throw(error);
         });
     }
-<%_ } if (authenticationType === 'session') { _%>
+<%_ } if (authenticationType === 'session' || authenticationType === 'oauth2') { _%>
 
     responseIntercept(observable: Observable<Response>): Observable<Response> {
         return <Observable<Response>> observable.catch((error) => {
@@ -75,10 +79,14 @@ export class AuthExpiredInterceptor extends JhiHttpInterceptor {
                 } else {
                     this.stateStorageService.storeUrl('/');
                 }
+                <%_ } if (authenticationType === 'session') { _%>
                 authServerProvider.logout();
                 const loginServiceModal = this.injector.get(LoginModalService);
                 loginServiceModal.open();
-
+                <%_ } else { _%>
+                const loginService = this.injector.get(LoginService);
+                loginService.login();
+                <%_ } _%>
             }
             return Observable.throw(error);
         });

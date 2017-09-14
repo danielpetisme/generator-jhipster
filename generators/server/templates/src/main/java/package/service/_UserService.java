@@ -47,9 +47,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 <%_ } _%>
 import org.springframework.security.crypto.password.PasswordEncoder;
-<%_ if (databaseType === 'sql' && authenticationType === 'oauth2') { _%>
-import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
-<%_ } _%>
 import org.springframework.stereotype.Service;<% if (databaseType === 'sql') { %>
 import org.springframework.transaction.annotation.Transactional;<% } %>
 
@@ -73,15 +70,12 @@ public class UserService {
     private final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
-
+<%_ if (authenticationType !== 'oauth2') { _%>
     private final PasswordEncoder passwordEncoder;
+<%_ } _%>
     <%_ if (enableSocialSignIn) { _%>
 
     private final SocialService socialService;
-    <%_ } _%>
-    <%_ if (databaseType === 'sql' && authenticationType === 'oauth2') { _%>
-
-    public final JdbcTokenStore jdbcTokenStore;
     <%_ } _%>
     <%_ if (searchEngine === 'elasticsearch') { _%>
 
@@ -100,14 +94,13 @@ public class UserService {
     private final CacheManager cacheManager;
     <%_ } _%>
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder<% if (enableSocialSignIn) { %>, SocialService socialService<% } %><% if (databaseType === 'sql' && authenticationType === 'oauth2') { %>, JdbcTokenStore jdbcTokenStore<% } %><% if (searchEngine === 'elasticsearch') { %>, UserSearchRepository userSearchRepository<% } %><% if (databaseType === 'sql' || databaseType === 'mongodb') { %><% if (authenticationType === 'session') { %>, PersistentTokenRepository persistentTokenRepository<% } %>, AuthorityRepository authorityRepository<% } %><% if (cacheManagerIsAvailable === true) { %>, CacheManager cacheManager<% } %>) {
+    public UserService(UserRepository userRepository, <%_ if (authenticationType !== 'oauth2') { _%>PasswordEncoder passwordEncoder<% } %><% if (enableSocialSignIn) { %>, SocialService socialService<% } %><% if (searchEngine === 'elasticsearch') { %>, UserSearchRepository userSearchRepository<% } %><% if (databaseType === 'sql' || databaseType === 'mongodb') { %><% if (authenticationType === 'session') { %>, PersistentTokenRepository persistentTokenRepository<% } %>, AuthorityRepository authorityRepository<% } %><% if (cacheManagerIsAvailable === true) { %>, CacheManager cacheManager<% } %>) {
         this.userRepository = userRepository;
+        <%_ if (authenticationType !== 'oauth2') { _%>
         this.passwordEncoder = passwordEncoder;
+        <%_ } _%>
         <%_ if (enableSocialSignIn) { _%>
         this.socialService = socialService;
-        <%_ } _%>
-        <%_ if (databaseType === 'sql' && authenticationType === 'oauth2') { _%>
-        this.jdbcTokenStore = jdbcTokenStore;
         <%_ } _%>
         <%_ if (searchEngine === 'elasticsearch') { _%>
         this.userSearchRepository = userSearchRepository;
@@ -122,7 +115,7 @@ public class UserService {
         this.cacheManager = cacheManager;
         <%_ } _%>
     }
-
+<%_ if (authenticationType !== 'oauth2') { _%>
     public Optional<User> activateRegistration(String key) {
         log.debug("Activating user for activation key {}", key);
         return userRepository.findOneByActivationKey(key)
@@ -252,7 +245,7 @@ public class UserService {
         log.debug("Created Information for User: {}", user);
         return user;
     }
-
+<%_ } _%>
     /**
      * Update basic information (first name, last name, email, language) for the current user.
      *
@@ -348,7 +341,7 @@ public class UserService {
             log.debug("Deleted User: {}", user);
         });
     }
-
+<%_ if (authenticationType !== 'oauth2') { _%>
     public void changePassword(String password) {
         userRepository.findOneByLogin(SecurityUtils.getCurrentUserLogin()).ifPresent(user -> {
             String encryptedPassword = passwordEncoder.encode(password);
@@ -362,7 +355,7 @@ public class UserService {
             log.debug("Changed password for User: {}", user);
         });
     }
-
+<%_ } _%>
     <%_ if (databaseType === 'sql') { _%>
     @Transactional(readOnly = true)
     <%_ } _%>
@@ -428,7 +421,7 @@ public class UserService {
         });
     }
     <%_ } _%>
-    <%_ if (databaseType === 'sql' || databaseType === 'mongodb') { _%>
+    <%_ if (authenticationType !== 'oauth2' && (databaseType === 'sql' || databaseType === 'mongodb')) { _%>
 
     /**
      * Not activated users should be automatically deleted after 3 days.

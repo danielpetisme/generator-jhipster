@@ -16,7 +16,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { browser, element, by } from 'protractor';
+import { browser, element, by<%_ if (authenticationType === 'oauth2') { _%>, protractor<%_ } _%> } from 'protractor';
 import { NavBarPage, SignInPage, PasswordPage, SettingsPage } from './../page-objects/jhi-page-objects';
 <%_
 let elementGetter = `getText()`;
@@ -30,6 +30,9 @@ describe('account', () => {
     let signInPage: SignInPage;
     let passwordPage: PasswordPage;
     let settingsPage: SettingsPage;
+    <%_ if (authenticationType === 'oauth2') { _%>
+    const ec = protractor.ExpectedConditions;
+    <%_ } _%>
 
     beforeAll(() => {
         browser.get('/');
@@ -47,6 +50,7 @@ describe('account', () => {
         element.all(by.css('h1')).first().<%- elementGetter %>.then((value) => {
             expect(value).toMatch(expect1);
         });
+    <%_ if (authenticationType !== 'oauth2') { _%>
         signInPage = navBarPage.getSignInPage();
         signInPage.autoSignInUsing('admin', 'foo');
 
@@ -58,6 +62,23 @@ describe('account', () => {
         element.all(by.css('.alert-danger')).first().<%- elementGetter %>.then((value) => {
             expect(value).toMatch(expect2);
         });
+    <%_ } else { _%>
+        signInPage.loginWithOAuth('admin@jhipster.org', 'foo');
+
+        // Keycloak
+        const alert = element.all(by.css('.alert-error'));
+        alert.isPresent().then((result) => {
+            if (result) {
+                expect(alert.first().getText()).toMatch("Invalid username or password.");
+            } else {
+                // Okta
+                const error = element.all(by.css('.infobox-error')).first();
+                browser.wait(ec.visibilityOf(error), 2000).then(() => {
+                    expect(error.getText()).toMatch("Sign in failed!");
+                });
+            }
+        });
+    <%_ } _%>
     });
 
     it('should login successfully with admin account', () => {
@@ -70,9 +91,9 @@ describe('account', () => {
             expect(value).toMatch(expect1);
         });
         signInPage.clearUserName();
-        signInPage.setUserName('admin');
+        signInPage.setUserName(<%_ if (authenticationType === 'oauth2') { _%>'admin@jhipster.org'<%_ } else { _%>'admin'<%_ } _%>);
         signInPage.clearPassword();
-        signInPage.setPassword('admin');
+        signInPage.setPassword(<%_ if (authenticationType === 'oauth2') { _%>'Java is hip in 2017!'<%_ } else { _%>'admin'<%_ } _%>);
         signInPage.login();
 
         browser.waitForAngular();
@@ -82,11 +103,22 @@ describe('account', () => {
         <%_ } else { _%>
         const expect2 = /You are logged in as user "admin"/;
         <%_ } _%>
+        <%_ if (authenticationType !== 'oauth2') { _%>
         element.all(by.css('.alert-success span')).<%- elementGetter %>.then((value) => {
             expect(value).toMatch(expect2);
         });
-    });
+        <%_ } else { _%>
+        const success = element.all(by.css('.alert-success span')).first();
+        browser.wait(ec.visibilityOf(success), 2000).then(() => {
+            success.<%- elementGetter %>.then((value) => {
+                expect(value).toMatch(expect2);
+            });
+        });
 
+        navBarPage.autoSignOut();
+        <%_ } _%>
+    });
+<%_ if (authenticationType !== 'oauth2') { _%>
     it('should be able to update settings', () => {
         settingsPage = navBarPage.getSettingsPage();
 
@@ -145,4 +177,5 @@ describe('account', () => {
     afterAll(() => {
         navBarPage.autoSignOut();
     });
+<%_ } _%>
 });
