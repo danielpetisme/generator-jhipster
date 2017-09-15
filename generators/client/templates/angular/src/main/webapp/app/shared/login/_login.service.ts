@@ -22,7 +22,7 @@ import { JhiLanguageService } from 'ng-jhipster';
 <%_ } _%>
 
 import { Principal } from '../auth/principal.service';
-<%_ } else if (authenticationType === 'jwt' || authenticationType === 'uaa') { _%>
+<%_ if (authenticationType === 'jwt' || authenticationType === 'uaa') { _%>
 import { AuthServerProvider } from '../auth/auth-jwt.service';
 <%_ } else if (authenticationType === 'session' || authenticationType === 'oauth2') { _%>
 import { AuthServerProvider } from '../auth/auth-session.service';

@@ -41,7 +41,7 @@ export class AuthExpiredInterceptor extends JhiHttpInterceptor {
     constructor(private injector: Injector) {
         super();
     }
-<%_ } if (authenticationType === 'session') { _%>
+<%_ } else if (authenticationType === 'session') { _%>
     constructor(private injector: Injector,
         private stateStorageService: StateStorageService,
         private router: Router) {
@@ -63,7 +63,7 @@ export class AuthExpiredInterceptor extends JhiHttpInterceptor {
             return Observable.throw(error);
         });
     }
-<%_ } if (authenticationType === 'session' || authenticationType === 'oauth2') { _%>
+<%_ } else if (authenticationType === 'session' || authenticationType === 'oauth2') { _%>
 
     responseIntercept(observable: Observable<Response>): Observable<Response> {
         return <Observable<Response>> observable.catch((error) => {
@@ -79,7 +79,7 @@ export class AuthExpiredInterceptor extends JhiHttpInterceptor {
                 } else {
                     this.stateStorageService.storeUrl('/');
                 }
-                <%_ } if (authenticationType === 'session') { _%>
+                <%_ if (authenticationType === 'session') { _%>
                 authServerProvider.logout();
                 const loginServiceModal = this.injector.get(LoginModalService);
                 loginServiceModal.open();
