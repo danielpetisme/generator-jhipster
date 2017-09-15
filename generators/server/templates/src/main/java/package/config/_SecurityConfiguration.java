@@ -93,7 +93,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public SecurityConfiguration(<%_ if (authenticationType !== 'oauth2') { _%>AuthenticationManagerBuilder authenticationManagerBuilder, UserDetailsService userDetailsService<%_ } _%><%_ if (authenticationType === 'session') { _%>,
         JHipsterProperties jHipsterProperties, RememberMeServices rememberMeServices<%_ } if (authenticationType === 'jwt') { _%>,
             TokenProvider tokenProvider<%_ } _%><%_ if (clusteredHttpSession === 'hazelcast') { _%>, SessionRegistry sessionRegistry,<%_ } _%>CorsFilter corsFilter) {
-
         <%_ if (authenticationType !== 'oauth2') { _%>
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.userDetailsService = userDetailsService;
@@ -110,8 +109,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         <%_ } _%>
         this.corsFilter = corsFilter;
     }
-
-    <%_ if (authenticationType !== 'oauth2') { _%>
+    <% if (authenticationType !== 'oauth2') { %>
     @PostConstruct
     public void init() {
         try {
@@ -163,14 +161,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             <%_ } _%>
             .antMatchers("/i18n/**")
             .antMatchers("/content/**")
-            .antMatchers("/swagger-ui/index.html")<% if (authenticationType === 'oauth2') { %>
+            .antMatchers("/swagger-ui/index.html")<% if (authenticationType !== 'oauth2') { %>
             .antMatchers("/api/register")
             .antMatchers("/api/activate")
             .antMatchers("/api/account/reset-password/init")
             .antMatchers("/api/account/reset-password/finish")<% } %>
             .antMatchers("/test/**")<% if (devDatabaseType !== 'h2Disk' && devDatabaseType !== 'h2Memory') { %>;<% } else { %>
             .antMatchers("/h2-console/**");<% } %>
-    }<% if (authenticationType === 'session' || authenticationType === 'jwt') { %>
+    }<% if (authenticationType === 'session' || authenticationType === 'jwt' || authenticationType === 'oauth2') { %>
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -223,7 +221,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()<% } %>
             .authorizeRequests()
-            <%_ if (authenticationType === 'oauth2') { _%>
+            <%_ if (authenticationType !== 'oauth2') { _%>
             .antMatchers("/api/register").permitAll()
             .antMatchers("/api/activate").permitAll()
             .antMatchers("/api/authenticate").permitAll()

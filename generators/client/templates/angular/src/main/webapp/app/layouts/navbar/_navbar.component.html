@@ -66,7 +66,7 @@
                         </a>
                     </li>
                     <%_ } _%>
-                    <%_ if (!skipUserManagement || !authenticationType === 'oauth2') { _%>
+                    <%_ if (!skipUserManagement && !authenticationType === 'oauth2') { _%>
                     <li>
                         <a class="dropdown-item" routerLink="user-management" routerLinkActive="active" (click)="collapseNavbar()">
                             <i class="fa fa-fw fa-user" aria-hidden="true"></i>

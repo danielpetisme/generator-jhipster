@@ -36,8 +36,9 @@ import <%=packageName%>.web.rest.vm.KeyAndPasswordVM;
 import <%=packageName%>.web.rest.vm.ManagedUserVM;
 <%_ } _%>
 import <%=packageName%>.service.UserService;
-
+<%_ if (authenticationType !== 'oauth2') { _%>
 import org.apache.commons.lang3.RandomStringUtils;
+<%_ } _%>
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,10 +51,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 <%_ if (authenticationType !== 'oauth2') { _%>
-<%_ } _%>
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
+<%_ } _%>
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;<% if (databaseType === 'sql' && authenticationType !== 'oauth2') { %>
@@ -62,20 +63,19 @@ import org.springframework.transaction.annotation.Transactional;<% } %>
 import org.springframework.web.context.WebApplicationContext;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-<% } %>
+<% } else { %>
 import java.time.Instant;<% if (databaseType === 'sql' || databaseType === 'mongodb') { %>
 import java.time.LocalDate;<% } %>
+<%_ } _%>
 import java.util.*;
 <% if (authenticationType !== 'oauth2') { %>
 import static org.assertj.core.api.Assertions.assertThat;
-<%_ } _%>
 import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.doNothing;
+<%_ } _%>
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
@@ -110,7 +110,7 @@ public class AccountResourceIntTest <% if (databaseType === 'cassandra') { %>ext
     @Autowired
     private HttpMessageConverter[] httpMessageConverters;
 <% } %>
-    <%_ if (authenticationType !== 'oauth2') { _%>@MockBean<%_ } else { _%>@Mock<%_ } _%>
+    <% if (authenticationType === 'oauth2') { %>@MockBean<% } else { %>@Mock<% } %>
     private UserService mockUserService;
 <% if (authenticationType !== 'oauth2') { %>
     @Mock

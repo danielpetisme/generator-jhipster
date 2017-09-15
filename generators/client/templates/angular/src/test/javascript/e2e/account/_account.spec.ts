@@ -64,6 +64,7 @@ describe('account', () => {
             expect(value).toMatch(expect2);
         });
     <%_ } else { _%>
+        signInPage = navBarPage.getSignInPage();
         signInPage.loginWithOAuth('admin@jhipster.org', 'foo');
 
         // Keycloak
@@ -83,6 +84,7 @@ describe('account', () => {
     });
 
     it('should login successfully with admin account', () => {
+        <%_ if (authenticationType !== 'oauth2') { _%>
         <%_ if (enableTranslation) { _%>
         const expect1 = /global.form.username/;
         <%_ } else { _%>
@@ -91,6 +93,7 @@ describe('account', () => {
         element.all(by.css('.modal-content label')).first().<%- elementGetter %>.then((value) => {
             expect(value).toMatch(expect1);
         });
+        <%_ } _%>
         signInPage.clearUserName();
         signInPage.setUserName(<%_ if (authenticationType === 'oauth2') { _%>'admin@jhipster.org'<%_ } else { _%>'admin'<%_ } _%>);
         signInPage.clearPassword();
