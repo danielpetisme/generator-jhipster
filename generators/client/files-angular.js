@@ -349,7 +349,7 @@ const files = {
             ]
         },
         {
-            condition: generator => !generator.skipUserManagement && !generator.authenticationType === 'oauth2',
+            condition: generator => !generator.skipUserManagement,
             path: ANGULAR_DIR,
             templates: [
                 { file: 'admin/user-management/_user-management.route.ts', method: 'processJs' },

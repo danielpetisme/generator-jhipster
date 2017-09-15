@@ -267,8 +267,8 @@ module.exports = JhipsterServerGenerator.extend({
                 if (this.languages === undefined) {
                     this.languages = ['en', 'fr'];
                 }
-                // user-management will be handled by UAA app
-                if (this.applicationType === 'gateway' && this.authenticationType === 'uaa') {
+                // user-management will be handled by UAA app, oauth expects users to be managed in IpP
+                if ((this.applicationType === 'gateway' && this.authenticationType === 'uaa') || this.authenticationType === 'oauth2') {
                     this.skipUserManagement = true;
                 }
 
