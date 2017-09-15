@@ -22,7 +22,7 @@ import <%=packageName%>.AbstractCassandraTest;<% } %>
 import <%=packageName%>.<%= mainClass %>;<% if (databaseType === 'sql' || databaseType === 'mongodb') { %>
 import <%=packageName%>.domain.Authority;<% } %><% if (authenticationType === 'session') { %>
 import <%=packageName%>.domain.PersistentToken;<% } %>
-import <%=packageName%>.domain.User;<% if (databaseType === 'sql' || databaseType === 'mongodb') { %>
+import <%=packageName%>.domain.User;<% if (authenticationType !== 'oauth2' && (databaseType === 'sql' || databaseType === 'mongodb')) { %>
 import <%=packageName%>.repository.AuthorityRepository;<% } %>
 <%_ if (authenticationType === 'session') { _%>
 import <%=packageName%>.repository.PersistentTokenRepository;
@@ -34,18 +34,23 @@ import <%=packageName%>.service.MailService;
 import <%=packageName%>.service.dto.UserDTO;
 import <%=packageName%>.web.rest.vm.KeyAndPasswordVM;
 import <%=packageName%>.web.rest.vm.ManagedUserVM;
-import <%=packageName%>.service.UserService;
 <%_ } _%>
+import <%=packageName%>.service.UserService;
+
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+<%_ if (authenticationType !== 'oauth2') { _%>
 import org.mockito.Mock;
+<%_ } _%>
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+<%_ if (authenticationType !== 'oauth2') { _%>
+<%_ } _%>
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -53,7 +58,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;<% if (databaseType === 'sql' && authenticationType !== 'oauth2') { %>
 import org.springframework.transaction.annotation.Transactional;<% } %>
-<%_ if (authenticationType !== 'oauth2') { _%>
+<%_ if (authenticationType === 'oauth2') { _%>
 import org.springframework.web.context.WebApplicationContext;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -61,8 +66,9 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import java.time.Instant;<% if (databaseType === 'sql' || databaseType === 'mongodb') { %>
 import java.time.LocalDate;<% } %>
 import java.util.*;
-
+<% if (authenticationType !== 'oauth2') { %>
 import static org.assertj.core.api.Assertions.assertThat;
+<%_ } _%>
 import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.doNothing;
@@ -88,10 +94,10 @@ public class AccountResourceIntTest <% if (databaseType === 'cassandra') { %>ext
     @Autowired
     private AuthorityRepository authorityRepository;
 <%_ } _%>
-<%_ if (authenticationType !== 'oauth2') { _%>
+<% if (authenticationType !== 'oauth2') { %>
     @Autowired
     private UserService userService;
-<%_ } _%>
+<% } %>
 <%_ if (authenticationType === 'session') { _%>
 
     @Autowired
@@ -103,8 +109,8 @@ public class AccountResourceIntTest <% if (databaseType === 'cassandra') { %>ext
 
     @Autowired
     private HttpMessageConverter[] httpMessageConverters;
-<%_ } _%>
-    @MockBean
+<% } %>
+    <%_ if (authenticationType !== 'oauth2') { _%>@MockBean<%_ } else { _%>@Mock<%_ } _%>
     private UserService mockUserService;
 <% if (authenticationType !== 'oauth2') { %>
     @Mock
@@ -113,7 +119,7 @@ public class AccountResourceIntTest <% if (databaseType === 'cassandra') { %>ext
     private MockMvc restMvc;
 <%_ } _%>
     private MockMvc restUserMockMvc;
-<%_ if (authenticationType === 'oauth2') { _%>
+<% if (authenticationType === 'oauth2') { %>
     @Autowired
     private WebApplicationContext context;
 <%_ } _%>
@@ -121,14 +127,16 @@ public class AccountResourceIntTest <% if (databaseType === 'cassandra') { %>ext
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        <%_ if (authenticationType !== 'oauth2') { _%>
         doNothing().when(mockMailService).sendActivationEmail(anyObject());
+        <%_ } _%>
 
         <%_ if (authenticationType ==! 'oauth2') { _%>
         AccountResource accountResource =
             new AccountResource(userRepository, userService, mockMailService<% if (authenticationType === 'session') { %>, persistentTokenRepository<% } %>);
         <%_ } _%>
         AccountResource accountUserMockResource =
-            new AccountResource(userRepository, mockUserService, mockMailService<% if (authenticationType === 'session') { %>, persistentTokenRepository<% } %>);
+            new AccountResource(userRepository, mockUserService<% if (authenticationType ==! 'oauth2') { %>, mockMailService<% } %><% if (authenticationType === 'session') { %>, persistentTokenRepository<% } %>);
         <%_ if (authenticationType ==! 'oauth2') { _%>
         this.restMvc = MockMvcBuilders.standaloneSetup(accountResource)
             .setMessageConverters(httpMessageConverters)
@@ -187,7 +195,7 @@ public class AccountResourceIntTest <% if (databaseType === 'cassandra') { %>ext
         <%_ } _%>
 
         restUserMockMvc.perform(get("/api/account")
-            <%_ if (authenticationType === 'oauth2') { _%>.with(user(user.getLogin()).roles("ADMIN"))<%_ } _%>
+            <% if (authenticationType === 'oauth2') { %>.with(user(user.getLogin()).roles("ADMIN"))<% } %>
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -974,5 +982,5 @@ public class AccountResourceIntTest <% if (databaseType === 'cassandra') { %>ext
                 .content(TestUtil.convertObjectToJsonBytes(keyAndPassword)))
             .andExpect(status().isInternalServerError());
     }
-<% } %>
+<%_ } _%>
 }

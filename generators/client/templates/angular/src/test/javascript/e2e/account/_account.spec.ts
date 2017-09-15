@@ -17,7 +17,7 @@
  limitations under the License.
 -%>
 import { browser, element, by<%_ if (authenticationType === 'oauth2') { _%>, protractor<%_ } _%> } from 'protractor';
-import { NavBarPage, SignInPage, PasswordPage, SettingsPage } from './../page-objects/jhi-page-objects';
+import { NavBarPage, SignInPage<%_ if (authenticationType !== 'oauth2') { _%>, PasswordPage, SettingsPage<%_ } _%> } from './../page-objects/jhi-page-objects';
 <%_
 let elementGetter = `getText()`;
 if (enableTranslation) {
@@ -28,9 +28,10 @@ describe('account', () => {
 
     let navBarPage: NavBarPage;
     let signInPage: SignInPage;
+    <%_ if (authenticationType !== 'oauth2') { _%>
     let passwordPage: PasswordPage;
     let settingsPage: SettingsPage;
-    <%_ if (authenticationType === 'oauth2') { _%>
+    <%_ } else { _%>
     const ec = protractor.ExpectedConditions;
     <%_ } _%>
 

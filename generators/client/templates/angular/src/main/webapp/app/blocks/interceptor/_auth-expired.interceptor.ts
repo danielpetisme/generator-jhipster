@@ -23,21 +23,20 @@ import { RequestOptionsArgs, Response } from '@angular/http';
 import { Router } from '@angular/router/router';
 <%_ } _%>
 import { Observable } from 'rxjs/Observable';
-<%_ if (authenticationType === 'jwt' || authenticationType === 'uaa') { _%>
+<%_ if (authenticationType === 'jwt' || authenticationType === 'uaa' || authenticationType === 'oauth2') { _%>
 import { LoginService } from '../../shared/login/login.service';
-<%_ } else if (authenticationType === 'session') { _%>
+<%_ } if (authenticationType === 'session') { _%>
 import { AuthServerProvider } from '../../shared/auth/auth-session.service';
 import { StateStorageService } from '../../shared/auth/state-storage.service';
 import { LoginModalService } from '../../shared/login/login-modal.service';
 <%_ } else if (authenticationType === 'oauth2') { _%>
 import { AuthServerProvider } from '../../shared/auth/auth-session.service';
 import { StateStorageService } from '../../shared/auth/state-storage.service';
-import { LoginService } from '../../shared/login/login.service';
 <%_ } _%>
 
 export class AuthExpiredInterceptor extends JhiHttpInterceptor {
 
-<%_ if (authenticationType === 'oauth2' || authenticationType === 'jwt' || authenticationType === 'uaa') { _%>
+<%_ if (authenticationType === 'jwt' || authenticationType === 'uaa') { _%>
     constructor(private injector: Injector) {
         super();
     }
@@ -45,6 +44,11 @@ export class AuthExpiredInterceptor extends JhiHttpInterceptor {
     constructor(private injector: Injector,
         private stateStorageService: StateStorageService,
         private router: Router) {
+        super();
+    }
+<%_ } else if (authenticationType === 'oauth2') { _%>_%>
+    constructor(private injector: Injector,
+        private stateStorageService: StateStorageService) {
         super();
     }
 <%_ } _%>
