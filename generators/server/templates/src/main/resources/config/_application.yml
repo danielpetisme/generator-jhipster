@@ -183,7 +183,8 @@ security:
         resource:
             #userInfoUri: ${oauth2.issuer}/v1/userinfo
             userInfoUri: ${oauth2.issuer}/protocol/openid-connect/userinfo
-            preferTokenInfo: true
+            tokenInfoUri: ${oauth2.issuer}/protocol/openid-connect/token/introspect
+            preferTokenInfo: false
     <%_ } _%>
 
 server:

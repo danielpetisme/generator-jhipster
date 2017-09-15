@@ -195,7 +195,7 @@ public class MailServiceIntTest <% if (databaseType === 'cassandra') { %>extends
         assertThat(message.getContent().toString()).isNotEmpty();
         assertThat(message.getDataHandler().getContentType()).isEqualTo("text/html;charset=UTF-8");
     }
-    <%_ } _%>
+    <% } å%>
     @Test
     public void testSendEmailWithException() throws Exception {
         doThrow(MailSendException.class).when(javaMailSender).send(any(MimeMessage.class));

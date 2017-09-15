@@ -113,7 +113,7 @@ describe('account', () => {
         });
         <%_ } else { _%>
         const success = element.all(by.css('.alert-success span')).first();
-        browser.wait(ec.visibilityOf(success), 2000).then(() => {
+        browser.wait(ec.visibilityOf(success), 5000).then(() => {
             success.<%- elementGetter %>.then((value) => {
                 expect(value).toMatch(expect2);
             });

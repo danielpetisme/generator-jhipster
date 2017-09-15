@@ -29,20 +29,27 @@ import <%=packageName%>.security.jwt.*;
 import io.github.jhipster.config.JHipsterProperties;
 <%_ } _%>
 import io.github.jhipster.security.*;
-
+<%_ if (authenticationType !== 'oauth2') { _%>
 import org.springframework.beans.factory.BeanInitializationException;
+<%_ } _%>
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+<%_ if (authenticationType !== 'oauth2') { _%>
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+<%_ } _%>
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
+<%_ if (authenticationType !== 'oauth2') { _%>
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;<% if (authenticationType === 'jwt' || authenticationType === 'oauth2') { %>
+<%_ } _%>
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;<% if (authenticationType === 'jwt') { %>
 import org.springframework.security.config.http.SessionCreationPolicy;<% } %><% if (clusteredHttpSession === 'hazelcast') { %>
 import org.springframework.security.core.session.SessionRegistry;<% } %>
+<%_ if (authenticationType !== 'oauth2') { _%>
 import org.springframework.security.core.userdetails.UserDetailsService;
+<%_ } _%>
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.data.repository.query.SecurityEvaluationContextExtension;
@@ -56,9 +63,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.filter.CorsFilter;
 <%_ } _%>
-
+<% if (authenticationType !== 'oauth2') { %>
 import javax.annotation.PostConstruct;
-
+<%_ } _%>
 @Configuration
 <%_ if (authenticationType === 'oauth2') { _%>
 @EnableOAuth2Sso
