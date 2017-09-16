@@ -160,8 +160,20 @@ public class AccountResource {
 
                 Set<Authority> userAuthorities = new LinkedHashSet<>();
 
-                // get groups from details
-                if (details.get("groups") != null) {
+                // get roles from details
+                if (details.get("roles") != null) {
+                    List roles = (ArrayList) details.get("roles");
+                    roles.forEach(role -> {
+                        // Ignore Keycloaks default roles, or add them to authorities.csv
+                        if (!String.valueOf(role).equalsIgnoreCase("offline_access") &&
+                            !String.valueOf(role).equalsIgnoreCase("uma_authorization")) {
+                            Authority userAuthority = new Authority();
+                            userAuthority.setName(role.toString());
+                            userAuthorities.add(userAuthority);
+                        }
+                    });
+                // if roles don't exist, try groups
+                } else if (details.get("groups") != null) {
                     List groups = (ArrayList) details.get("groups");
                     groups.forEach(group -> {
                         // Ignore Okta's Everyone group, or add it to Liquibase's authorities.csv

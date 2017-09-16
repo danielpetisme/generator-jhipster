@@ -65,7 +65,7 @@ describe('account', () => {
         });
     <%_ } else { _%>
         signInPage = navBarPage.getSignInPage();
-        signInPage.loginWithOAuth('admin@jhipster.org', 'foo');
+        signInPage.loginWithOAuth('admin', 'foo');
 
         // Keycloak
         const alert = element.all(by.css('.alert-error'));
