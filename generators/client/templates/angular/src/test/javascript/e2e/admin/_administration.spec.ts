@@ -35,7 +35,7 @@ describe('administration', () => {
         <%_ if (authenticationType !== 'oauth2') { _%>
         navBarPage.getSignInPage().autoSignInUsing('admin', 'admin');
         <%_ } else { _%>
-        navBarPage.getSignInPage().loginWithOAuth('admin@jhipster.org', 'Java is hip in 2017!');
+        navBarPage.getSignInPage().loginWithOAuth('admin', 'admin');
         <%_ } _%>
         browser.waitForAngular();
     });

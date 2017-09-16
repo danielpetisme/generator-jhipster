@@ -95,9 +95,9 @@ describe('account', () => {
         });
         <%_ } _%>
         signInPage.clearUserName();
-        signInPage.setUserName(<%_ if (authenticationType === 'oauth2') { _%>'admin@jhipster.org'<%_ } else { _%>'admin'<%_ } _%>);
+        signInPage.setUserName('admin');
         signInPage.clearPassword();
-        signInPage.setPassword(<%_ if (authenticationType === 'oauth2') { _%>'Java is hip in 2017!'<%_ } else { _%>'admin'<%_ } _%>);
+        signInPage.setPassword('admin');
         signInPage.login();
 
         browser.waitForAngular();
