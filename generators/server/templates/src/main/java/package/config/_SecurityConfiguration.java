@@ -61,8 +61,8 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.web.filter.CorsFilter;
 <%_ } _%>
+import org.springframework.web.filter.CorsFilter;
 <% if (authenticationType !== 'oauth2') { %>
 import javax.annotation.PostConstruct;
 <%_ } _%>
