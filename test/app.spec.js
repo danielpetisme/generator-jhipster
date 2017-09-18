@@ -450,6 +450,7 @@ describe('JHipster generator', () => {
                         clientFramework: 'angularX',
                         serviceDiscoveryType: false,
                         authenticationType: 'oauth2',
+                        identityProvider: 'keycloak',
                         hibernateCache: 'ehcache',
                         databaseType: 'sql',
                         devDatabaseType: 'h2Memory',

@@ -455,7 +455,7 @@ function askForServerSideOpts(meta) {
             this.authenticationType = 'uaa';
         }
 
-        if(this.authenticationType === 'oauth2') {
+        if (this.authenticationType === 'oauth2') {
             this.identityProvider = props.identityProvider;
         }
 
