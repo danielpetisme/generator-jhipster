@@ -209,6 +209,9 @@ module.exports = JhipsterServerGenerator.extend({
             if (this.authenticationType === 'session') {
                 this.rememberMeKey = this.config.get('rememberMeKey');
             }
+            if (this.authenticationType === 'oauth2') {
+                this.identityProvider = this.config.get('identityProvider');
+            }
             this.jwtSecretKey = this.config.get('jwtSecretKey');
             this.nativeLanguage = this.config.get('nativeLanguage');
             this.languages = this.config.get('languages');
@@ -370,6 +373,7 @@ module.exports = JhipsterServerGenerator.extend({
             this.config.set('packageFolder', this.packageFolder);
             this.config.set('serverPort', this.serverPort);
             this.config.set('authenticationType', this.authenticationType);
+            this.config.set('identityProvider', this.identityProvider);
             this.config.set('uaaBaseName', this.uaaBaseName);
             this.config.set('hibernateCache', this.hibernateCache);
             this.config.set('clusteredHttpSession', this.clusteredHttpSession);

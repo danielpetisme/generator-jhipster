@@ -123,7 +123,7 @@ function askForServerSideOpts(meta) {
                 },
                 {
                     value: 'oauth2',
-                    name: 'OAuth 2.0 / OIDC Authentication (stateful, works with Keycloak and Okta)'
+                    name: 'OAuth 2.0 / OIDC Authentication (stateful, with external or generated identity provider)'
                 }
             ],
             default: 0
@@ -165,6 +165,26 @@ function askForServerSideOpts(meta) {
                 }
                 return `Could not find a valid JHipster UAA server in path "${input}"`;
             }
+        },
+        {
+            when: response => response.authenticationType === 'oauth2',
+            type: 'list',
+            name: 'identityProvider',
+            message: response => this.getNumberedQuestion(
+                'Which *identity provider* would you like to use?',
+                response.authenticationType === 'oauth2'
+            ),
+            choices: [
+                {
+                    value: 'okta',
+                    name: 'Okta',
+                },
+                {
+                    value: 'keycloak',
+                    name: 'Keycloak'
+                }
+            ],
+            default: 0
         },
         {
             when: response => applicationType === 'microservice' || (response.authenticationType === 'uaa' && applicationType === 'gateway'),
@@ -433,6 +453,10 @@ function askForServerSideOpts(meta) {
 
         if (this.applicationType === 'uaa') {
             this.authenticationType = 'uaa';
+        }
+
+        if(this.authenticationType === 'oauth2') {
+            this.identityProvider = props.identityProvider;
         }
 
         this.packageName = props.packageName;
