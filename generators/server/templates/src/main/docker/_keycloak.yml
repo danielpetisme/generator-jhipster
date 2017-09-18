@@ -19,7 +19,9 @@
 version: '2'
 services:
     keycloak:
-      image: danielpetisme/jhipster-keycloak:latest
+      image: <%= DOCKER_KEYCLOAK %>
+      volumes:
+         - ./realm-config:/opt/jboss/keycloak/import
       environment:
         - KEYCLOAK_USER=admin
         - KEYCLOAK_PASSWORD=admin
