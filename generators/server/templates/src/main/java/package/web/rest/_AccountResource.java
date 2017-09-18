@@ -158,37 +158,38 @@ public class AccountResource {
                     user.setLangKey(langKey);
                 }
 
-                Set<Authority> userAuthorities = new LinkedHashSet<>();
+                Set<Authority> userAuthorities;
 
                 // get roles from details
                 if (details.get("roles") != null) {
-                    List roles = (ArrayList) details.get("roles");
-                    roles.forEach(role -> {
-                        // Ignore Keycloaks default roles, or add them to authorities.csv
-                        if (!String.valueOf(role).equalsIgnoreCase("offline_access") &&
-                            !String.valueOf(role).equalsIgnoreCase("uma_authorization")) {
+                    List<String> roles = (List) details.get("roles");
+                    userAuthorities = roles.stream()
+                        .filter(role -> role.startsWith("ROLE_"))
+                        .map(role -> {
                             Authority userAuthority = new Authority();
-                            userAuthority.setName(role.toString());
-                            userAuthorities.add(userAuthority);
-                        }
-                    });
-                // if roles don't exist, try groups
+                            userAuthority.setName(role);
+                            return userAuthority;
+                        })
+                        .collect(Collectors.toSet());
+                    // if roles don't exist, try groups
                 } else if (details.get("groups") != null) {
-                    List groups = (ArrayList) details.get("groups");
-                    groups.forEach(group -> {
-                        // Ignore Okta's Everyone group, or add it to Liquibase's authorities.csv
-                        if (!String.valueOf(group).equalsIgnoreCase("everyone")) {
+                    List<String> groups = (List) details.get("groups");
+                    userAuthorities = groups.stream()
+                        .filter(group -> group.startsWith("ROLE_"))
+                        .map(group -> {
                             Authority userAuthority = new Authority();
-                            userAuthority.setName(group.toString());
-                            userAuthorities.add(userAuthority);
-                        }
-                    });
+                            userAuthority.setName(group);
+                            return userAuthority;
+                        })
+                        .collect(Collectors.toSet());
                 } else {
-                    authentication.getAuthorities().forEach(role -> {
-                        Authority userAuthority = new Authority();
-                        userAuthority.setName(role.getAuthority());
-                        userAuthorities.add(userAuthority);
-                    });
+                    userAuthorities = authentication.getAuthorities().stream()
+                        .map(role -> {
+                            Authority userAuthority = new Authority();
+                            userAuthority.setName(role.getAuthority());
+                            return userAuthority;
+                        })
+                        .collect(Collectors.toSet());
                 }
 
                 user.setAuthorities(userAuthorities);

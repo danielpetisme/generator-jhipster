@@ -48,7 +48,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+<%_ if (authenticationType === 'oauth2') { _%>
 import org.springframework.boot.test.mock.mockito.MockBean;
+<%_ } _%>
 import org.springframework.http.MediaType;
 <%_ if (authenticationType !== 'oauth2') { _%>
 import org.springframework.http.converter.HttpMessageConverter;
@@ -97,7 +99,7 @@ public class AccountResourceIntTest <% if (databaseType === 'cassandra') { %>ext
 <% if (authenticationType !== 'oauth2') { %>
     @Autowired
     private UserService userService;
-<% } %>
+<%_ } _%>
 <%_ if (authenticationType === 'session') { _%>
 
     @Autowired
@@ -131,13 +133,13 @@ public class AccountResourceIntTest <% if (databaseType === 'cassandra') { %>ext
         doNothing().when(mockMailService).sendActivationEmail(anyObject());
         <%_ } _%>
 
-        <%_ if (authenticationType ==! 'oauth2') { _%>
+        <%_ if (authenticationType !== 'oauth2') { _%>
         AccountResource accountResource =
             new AccountResource(userRepository, userService, mockMailService<% if (authenticationType === 'session') { %>, persistentTokenRepository<% } %>);
         <%_ } _%>
         AccountResource accountUserMockResource =
-            new AccountResource(userRepository, mockUserService<% if (authenticationType ==! 'oauth2') { %>, mockMailService<% } %><% if (authenticationType === 'session') { %>, persistentTokenRepository<% } %>);
-        <%_ if (authenticationType ==! 'oauth2') { _%>
+            new AccountResource(userRepository, mockUserService<% if (authenticationType !== 'oauth2') { %>, mockMailService<% } %><% if (authenticationType === 'session') { %>, persistentTokenRepository<% } %>);
+        <%_ if (authenticationType !== 'oauth2') { _%>
         this.restMvc = MockMvcBuilders.standaloneSetup(accountResource)
             .setMessageConverters(httpMessageConverters)
             .build();

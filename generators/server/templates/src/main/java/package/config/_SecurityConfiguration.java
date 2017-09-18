@@ -65,7 +65,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.filter.CorsFilter;
 <% if (authenticationType !== 'oauth2') { %>
 import javax.annotation.PostConstruct;
-<%_ } _%>
+<% } %>
 @Configuration
 <%_ if (authenticationType === 'oauth2') { _%>
 @EnableOAuth2Sso
@@ -98,8 +98,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private final CorsFilter corsFilter;
 
     public SecurityConfiguration(<%_ if (authenticationType !== 'oauth2') { _%>AuthenticationManagerBuilder authenticationManagerBuilder, UserDetailsService userDetailsService<%_ } _%><%_ if (authenticationType === 'session') { _%>,
-        JHipsterProperties jHipsterProperties, RememberMeServices rememberMeServices<%_ } if (authenticationType === 'jwt') { _%>,
-            TokenProvider tokenProvider<%_ } _%><%_ if (clusteredHttpSession === 'hazelcast') { _%>, SessionRegistry sessionRegistry<%_ } _%>, CorsFilter corsFilter) {
+        JHipsterProperties jHipsterProperties, RememberMeServices rememberMeServices, <%_ } if (authenticationType === 'jwt') { _%>,
+            TokenProvider tokenProvider<%_ } _%><%_ if (clusteredHttpSession === 'hazelcast') { _%>, SessionRegistry sessionRegistry, <%_ } if (authenticationType !== 'oauth2') { %>,<%_ } _%>CorsFilter corsFilter) {
         <%_ if (authenticationType !== 'oauth2') { _%>
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.userDetailsService = userDetailsService;
@@ -211,7 +211,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .logoutSuccessHandler(ajaxLogoutSuccessHandler())<% if (clusteredHttpSession === 'hazelcast') { %>
             .deleteCookies("hazelcast.sessionId")<% } %>
             .permitAll()<% } %>
-        .and()<% if (authenticationType === 'oauth2') { %>
+        <% if (authenticationType === 'oauth2') { %>.and()
             .logout()
             .logoutUrl("/api/logout")
             .logoutSuccessHandler(ajaxLogoutSuccessHandler())<% if (clusteredHttpSession === 'hazelcast') { %>
