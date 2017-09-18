@@ -44,7 +44,7 @@ export * from './login/login-modal.service';
 <%_ } _%>
 export * from './login/login.service';
 export * from './user/account.model';
-<%_ if (!skipUserManagement) { _%>
+<%_ if (!skipUserManagement || authenticationType === 'oauth2') { _%>
 export * from './user/user.model';
 export * from './user/user.service';
 <%_ } _%>

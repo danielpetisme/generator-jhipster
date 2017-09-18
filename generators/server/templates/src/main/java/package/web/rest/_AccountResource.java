@@ -73,6 +73,7 @@ import java.net.URLDecoder;
 <%_ if (authenticationType === 'oauth2') { _%>
 import java.security.Principal;
 import java.time.Instant;
+import java.util.stream.Collectors;
 <%_ } _%>
 import java.util.*;
 
