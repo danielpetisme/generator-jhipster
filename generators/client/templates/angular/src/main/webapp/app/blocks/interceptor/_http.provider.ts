@@ -19,14 +19,18 @@
 import { JhiEventManager, JhiInterceptableHttp } from 'ng-jhipster';
 import { Injector } from '@angular/core';
 import { Http, XHRBackend, RequestOptions } from '@angular/http';
-<%_ if (authenticationType === 'session') { _%>
-import { Router } from '@angular/router/router';
-<%_ } _%>
 
 <%_ if (authenticationType === 'jwt' || authenticationType === 'uaa') { _%>
+    <%_ if (authenticationType !== 'uaa') { _%>
 import { AuthInterceptor } from './auth.interceptor';
+    <%_ } _%>
 import { LocalStorageService, SessionStorageService } from 'ng2-webstorage';
-<%_ } if (authenticationType === 'session' || authenticationType === 'oauth2') { _%>
+<%_ } _%>
+<%_ if (authenticationType === 'session' || authenticationType === 'oauth2') { _%>
+    <%_ if (authenticationType === 'session'
+import { AuthServerProvider } from '../../shared/auth/auth-session.service';
+import { LoginModalService } from '../../shared/login/login-modal.service';
+    <%_ } _%>
 import { StateStorageService } from '../../shared/auth/state-storage.service';
 <%_ } _%>
 <%_ if (!skipServer) { _%>
@@ -45,7 +49,8 @@ export function interceptableFactory(
     <%_ } else if (authenticationType === 'session') { _%>
     injector: Injector,
     stateStorageService: StateStorageService,
-    router: Router,
+    authServerProvider: AuthServerProvider,
+    loginServiceModal: LoginModalService,
     <%_ } else if (authenticationType === 'oauth2') { _%>
     injector: Injector,
     stateStorageService: StateStorageService,
@@ -57,10 +62,13 @@ export function interceptableFactory(
         defaultOptions,
         [
         <%_ if (authenticationType === 'jwt' || authenticationType === 'uaa') { _%>
+		<%_ if (authenticationType !== 'uaa') { _%>
             new AuthInterceptor(localStorage, sessionStorage),
+        <%_ } _%>
             new AuthExpiredInterceptor(injector),
         <%_ } else if (authenticationType === 'session') { _%>
-            new AuthExpiredInterceptor(injector, stateStorageService, router),
+            new AuthExpiredInterceptor(stateStorageService,
+                authServerProvider, loginServiceModal),
         <%_ } else if (authenticationType === 'oauth2') { _%>
             new AuthExpiredInterceptor(injector, stateStorageService),
         <%_ } _%>
