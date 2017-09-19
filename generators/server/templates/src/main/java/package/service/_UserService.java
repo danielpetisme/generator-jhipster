@@ -448,7 +448,7 @@ public class UserService {
             <%_ } _%>
         }
     }
-    <% } else if (databaseType === 'sql' || databaseType === 'mongodb') { %>
+    <% } if (databaseType === 'sql' || databaseType === 'mongodb') { %>
     /**
      * @return a list of all the authorities
      */
