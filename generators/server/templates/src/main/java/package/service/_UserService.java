@@ -125,7 +125,7 @@ public class UserService {
         this.cacheManager = cacheManager;
         <%_ } _%>
     }
-<%_ if (authenticationType !== 'oauth2') { _%>
+<% if (authenticationType !== 'oauth2') { %>
     public Optional<User> activateRegistration(String key) {
         log.debug("Activating user for activation key {}", key);
         return userRepository.findOneByActivationKey(key)
@@ -448,11 +448,11 @@ public class UserService {
             <%_ } _%>
         }
     }
-<% } %>
+    <% } else if (databaseType === 'sql' || databaseType === 'mongodb') { %>
     /**
      * @return a list of all the authorities
      */
     public List<String> getAuthorities() {
         return authorityRepository.findAll().stream().map(Authority::getName).collect(Collectors.toList());
-    }
+    }<% } %>
 }
