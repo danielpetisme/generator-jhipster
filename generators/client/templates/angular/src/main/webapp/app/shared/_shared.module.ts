@@ -27,7 +27,7 @@ import {
     AuthServerProvider,
     <%_ } _%>
     AccountService,
-    <%_ if (!skipUserManagement) { _%>
+    <%_ if (!skipUserManagement || authenticationType === 'oauth2') { _%>
     UserService,
     <%_ } _%>
     StateStorageService,
@@ -79,7 +79,7 @@ import {
         <%_ if (enableSocialSignIn) { _%>
         SocialService,
         <%_ } _%>
-        <%_ if (!skipUserManagement) { _%>
+        <%_ if (!skipUserManagement || authenticationType === 'oauth2') { _%>
         UserService,
         <%_ } _%>
         DatePipe

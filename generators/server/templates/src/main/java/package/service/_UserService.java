@@ -68,9 +68,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 <%_ } _%>
 import java.util.*;
-<% if (authenticationType !== 'oauth2') { %>
 import java.util.stream.Collectors;
-<%_ } _%>
 
 /**
  * Service class for managing users.
@@ -450,11 +448,11 @@ public class UserService {
             <%_ } _%>
         }
     }
-
+<% } %>
     /**
      * @return a list of all the authorities
      */
     public List<String> getAuthorities() {
         return authorityRepository.findAll().stream().map(Authority::getName).collect(Collectors.toList());
-    }<% } %>
+    }
 }
